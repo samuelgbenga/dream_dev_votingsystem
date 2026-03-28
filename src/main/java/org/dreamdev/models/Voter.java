@@ -1,4 +1,16 @@
 package org.dreamdev.models;
 
-public class Voter {
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "voters")
+@NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
+public class Voter extends User {
+
+    private String voterId;
+
+    private VoterStatus status;
 }

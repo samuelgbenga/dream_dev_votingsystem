@@ -4,30 +4,19 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
-@Document(collection = "elections")
+@Document(collection = "categories")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Election {
+public class Category {
 
     @Id
     private String id;
 
-    private String electionId;
-
-    private String electionName;
-
-    private LocalDate date;
-
-    private LocalTime startTime;
-
-    private LocalTime stopTime;
+    private String type;
 
     private LocalDateTime createdAt;
-
 }
