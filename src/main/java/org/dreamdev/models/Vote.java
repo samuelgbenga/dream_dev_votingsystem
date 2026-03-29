@@ -28,6 +28,9 @@ public class Vote {
 
     private String candidateId;
 
+    private String categoryId;
+
+    @Setter
     private String jwtToken;
 
     private LocalDateTime createdAt;

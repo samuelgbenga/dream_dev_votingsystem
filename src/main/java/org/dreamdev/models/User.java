@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,7 +19,12 @@ public abstract class User {
     private String lastName;
     private String firstName;
     private String dateOfBirth;
-    private String citizenship;
-    private String createdAt;
+    private CitizenshipType citizenship;
+    private LocalDateTime createdAt = LocalDateTime.now();
     private List<Permission> permissions;
 }
+
+
+/*
+
+ */
