@@ -5,6 +5,7 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,7 +22,7 @@ public abstract class User {
     private String dateOfBirth;
     private CitizenshipType citizenship;
     private LocalDateTime createdAt = LocalDateTime.now();
-    private List<Permission> permissions;
+    private List<Permission> permissions = new ArrayList<>();
 }
 
 
