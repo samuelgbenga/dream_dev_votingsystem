@@ -2,11 +2,11 @@ package org.dreamdev.service;
 
 import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
-import org.dreamdev.models.CitizenshipType;
-import org.dreamdev.models.Permission;
-import org.dreamdev.models.Voter;
+import org.dreamdev.models.*;
+import org.dreamdev.repositories.CandidateRepository;
 import org.dreamdev.repositories.VoteRepository;
 import org.dreamdev.repositories.VoterRepository;
+import org.dreamdev.services.JwtService;
 import org.dreamdev.services.VoterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +28,12 @@ public class VoterServiceTest {
 
     @Autowired
     private VoteRepository voteRepository;
+
+    @Autowired
+    private CandidateRepository candidateRepository;
+
+    @Autowired
+    private JwtService jwtService;
 
     private VoterRequest voterRequest;
 
@@ -84,5 +90,68 @@ public class VoterServiceTest {
         assertEquals(0L, voterRepository.count());
         voterService.registerVoter(voterRequest);
         assertEquals(1L, voterRepository.count());
+    }
+
+    @Test
+    public void confirm_vote_successfully() {
+       Vote vote = Vote.builder()
+                .electionId("ELECTGUB2026")
+                .candidateId("ELECTGUB2026-CAND-001")
+                .categoryId("CAT-003")
+                .hashedVoterId("hashed-id")
+                .voteStatus(org.dreamdev.models.VoteStatus.DEFAULTED)
+                .build();
+
+        Vote savedVote = voteRepository.save(vote);
+
+        String token = jwtService.generateVoteToken(savedVote.getId());
+
+        String response = voterService.confirmVote(token);
+
+        assertEquals("Vote confirmed", response);
+
+        Vote updatedVote =
+                voteRepository.findById(savedVote.getId()).orElse(null);
+
+        assertNotNull(updatedVote);
+        assertEquals(VoteStatus.VOTED, updatedVote.getVoteStatus());
+    }
+
+
+    @Test
+    public void confirm_vote_should_increase_candidate_vote_count() {
+
+        Candidate candidate = Candidate.builder()
+                .candidateId("ELECTGUB2026-CAND-001")
+                .numberOfVote(10)
+                .categoryId("CAT-003")
+                .firstName("John")
+                .lastName("Doe")
+                .dateOfBirth("1990-01-01")
+                .citizenship(CitizenshipType.REGISTRATION)
+                .build();
+
+        candidateRepository.save(candidate);
+
+        Vote vote = Vote.builder()
+                .electionId("ELECTGUB2026")
+                .candidateId("ELECTGUB2026-CAND-001")
+                .categoryId("CAT-003")
+                .hashedVoterId("hashed-id")
+                .voteStatus(VoteStatus.DEFAULTED)
+                .build();
+
+        Vote savedVote = voteRepository.save(vote);
+
+        String token = jwtService.generateVoteToken(savedVote.getId());
+
+        voterService.confirmVote(token);
+
+        Candidate updatedCandidate =
+                candidateRepository.findByCandidateId("ELECTGUB2026-CAND-001").get();
+
+        // Step 6: Assertions
+        assertNotNull(updatedCandidate);
+        assertEquals(11, updatedCandidate.getNumberOfVote()); // incremented by 1
     }
 }

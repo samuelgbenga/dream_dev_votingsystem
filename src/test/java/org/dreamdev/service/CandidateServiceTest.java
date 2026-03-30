@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -93,7 +94,7 @@ public class CandidateServiceTest {
     public void upload_candidates_saves_correct_data() {
         candidateService.uploadCandidate(validCsvFile, ELECTORATE_ID);
 
-        Candidate candidate = candidateRepository.findByCandidateId("ELECT2024-CAND-001");
+        Candidate candidate = candidateRepository.findByCandidateId("ELECT2024-CAND-001").get();
 
         assertNotNull(candidate);
         assertEquals("Chinedu", candidate.getFirstName());

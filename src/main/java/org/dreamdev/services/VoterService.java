@@ -4,11 +4,9 @@ package org.dreamdev.services;
 import lombok.RequiredArgsConstructor;
 import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
-import org.dreamdev.exceptions.CanNotVoteAgainException;
-import org.dreamdev.exceptions.InvalidElection;
-import org.dreamdev.exceptions.PermissionNotFoundException;
-import org.dreamdev.exceptions.NotFoundException;
+import org.dreamdev.exceptions.*;
 import org.dreamdev.models.*;
+import org.dreamdev.repositories.CandidateRepository;
 import org.dreamdev.repositories.ElectionRepository;
 import org.dreamdev.repositories.VoteRepository;
 import org.dreamdev.repositories.VoterRepository;
@@ -32,6 +30,7 @@ public class VoterService {
     private final VoteRepository voteRepository;
     private final JwtService jwtService;
     private final ElectionRepository electionRepository;
+    private final CandidateRepository candidateRepository;
 
     public Voter registerVoter(VoterRequest request) {
         Voter voter = Voter.builder()
@@ -41,20 +40,6 @@ public class VoterService {
                 .citizenship(request.getCitizenship())
                 .status(VoterStatus.PENDING)
                 .voterId(generateVoterId(request.getFirstName(), request.getLastName()))
-                //.permissions(List.of(Permission.CAN_UPLOAD_FILE))
-                .build();
-
-        return voterRepository.save(voter);
-    }
-
-
-    public Voter vote(VoterRequest request) {
-        Voter voter = Voter.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .dateOfBirth(request.getDateOfBirth())
-                .citizenship(request.getCitizenship())
-                .status(VoterStatus.PENDING)
                 //.permissions(List.of(Permission.CAN_UPLOAD_FILE))
                 .build();
 
@@ -73,6 +58,24 @@ public class VoterService {
         savedVote.setJwtToken(jwtToken);
         voteRepository.save(savedVote);
         return buildVoteCompletionLink(jwtToken);
+    }
+
+    public String confirmVote(String jwtToken){
+        if(!jwtService.isTokenValid(jwtToken)) throw new ExpiredTokenException("Token is invalid expired");
+        String voteId = jwtService.extractVoteId(jwtToken);
+        Optional<Vote> vote = voteRepository.findById(voteId);
+        if(vote.isEmpty()) throw new NotFoundException("Vote with this Id not found");
+        increaseCandidateVote(vote.get());
+        vote.get().setVoteStatus(VoteStatus.VOTED);
+        voteRepository.save(vote.get());
+        return "Vote confirmed";
+    }
+
+    private void increaseCandidateVote(Vote vote) {
+        Optional<Candidate> candidate = candidateRepository.findByCandidateId(vote.getCandidateId());
+        if(candidate.isEmpty()) throw new NotFoundException("Candidate with this id cannot be found");
+        candidate.get().setNumberOfVote(candidate.get().getNumberOfVote() + 1);
+        candidateRepository.save(candidate.get());
     }
 
     private void validateVoter(VoteRequest request) {
@@ -108,7 +111,7 @@ public class VoterService {
 
 
     private String buildVoteCompletionLink(String jwtToken) {
-        return "https://localhost:8080/api/v1/votes/complete/" + jwtToken;
+        return "https://localhost:8080/api/v1/votes/complete?complete_vote=" + jwtToken;
     }
 
     private boolean hasAlreadyVoted(String voterId, String electionId, String categoryId) {

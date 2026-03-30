@@ -94,7 +94,7 @@ A partially immutable entity.
 
 * `id`
 * `hashedVoterId`
-* `candidate` (Many-to-One relationship)
+* `candidatID` 
 * `createdAt`
 * `status` → `DEFAULTED`, `VOTED`
 * `numberOfVotes`
@@ -108,8 +108,8 @@ Only `status` can change after creation.
 ## Permissions and Roles
 
 | Role       | Permissions     |
-| ---------- | --------------- |
-| Admin      | `can_upload`    |
+|------------| --------------- |
+| Electorate | `can_upload`    |
 | Electorate | `approve_voter` |
 | Voter      | `can_vote`      |
 | Candidate  | None by default |

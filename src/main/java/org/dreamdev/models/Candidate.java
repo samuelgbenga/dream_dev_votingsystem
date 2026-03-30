@@ -14,6 +14,7 @@ public class Candidate extends User {
 
     private String candidateId;
 
+    @Setter
     private int numberOfVote;
 
     private String categoryId;
