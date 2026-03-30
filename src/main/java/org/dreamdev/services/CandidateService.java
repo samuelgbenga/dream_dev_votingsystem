@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.exceptions.EmptyFileException;
 import org.dreamdev.models.Candidate;
 import org.dreamdev.models.CitizenshipType;
 import org.dreamdev.repositories.CandidateRepository;
@@ -22,8 +23,11 @@ public class CandidateService {
 
     private final CandidateRepository candidateRepository;
 
-    public String uploadCandidate(MultipartFile file) {
-        if (file.isEmpty()) throw new RuntimeException("File is empty");
+    public String uploadCandidate(MultipartFile file, String electorateId) {
+
+        validate(electorateId);
+
+        if (file.isEmpty()) throw new EmptyFileException("File is empty");
 
         try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
             List<String[]> rows = csvReader.readAll();
@@ -40,6 +44,9 @@ public class CandidateService {
             log.error("Failed to read CSV file: {}", e.getMessage());
             throw new RuntimeException("Failed to process CSV file: " + e.getMessage());
         }
+    }
+
+    private void validate(String electorateId) {
     }
 
     private List<Candidate>  getCandidateList(List<String[]> rows ){

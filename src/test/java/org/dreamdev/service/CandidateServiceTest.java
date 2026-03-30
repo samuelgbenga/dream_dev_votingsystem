@@ -23,6 +23,8 @@ public class CandidateServiceTest {
     private MockMultipartFile validCsvFile;
     private MockMultipartFile emptyCsvFile;
 
+    private final String electorateId = "ELECTORATE-001";
+
     @BeforeEach
     public void setUp() {
         candidateRepository.deleteAll();
@@ -55,7 +57,7 @@ public class CandidateServiceTest {
     public void upload_candidates_from_csv_successfully() {
         assertEquals(0L, candidateRepository.count());
 
-        String result = candidateService.uploadCandidate(validCsvFile);
+        String result = candidateService.uploadCandidate(validCsvFile, electorateId );
 
         assertEquals(5L, candidateRepository.count());
         assertEquals("5 candidates uploaded successfully", result);
@@ -63,7 +65,7 @@ public class CandidateServiceTest {
 
     @Test
     public void upload_candidates_saves_correct_data() {
-        candidateService.uploadCandidate(validCsvFile);
+        candidateService.uploadCandidate(validCsvFile, electorateId);
 
         Candidate candidate = candidateRepository.findByCandidateId("ELECT2024-CAND-001");
 
@@ -76,7 +78,7 @@ public class CandidateServiceTest {
 
     @Test
     public void upload_empty_file_throws_exception() {
-        assertThrows(RuntimeException.class, () -> candidateService.uploadCandidate(emptyCsvFile));
+        assertThrows(RuntimeException.class, () -> candidateService.uploadCandidate(emptyCsvFile, electorateId));
         assertEquals(0L, candidateRepository.count());
     }
 }

@@ -6,11 +6,11 @@ import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
 import org.dreamdev.exceptions.CanNotVoteAgainException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
-import org.dreamdev.exceptions.VoterNotFoundException;
+import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.models.*;
-import org.dreamdev.repositories.CandidateRepository;
 import org.dreamdev.repositories.VoteRepository;
 import org.dreamdev.repositories.VoterRepository;
+import org.dreamdev.utils.HelperClass;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
@@ -74,23 +74,24 @@ public class VoterService {
 
     private void validateVoter(VoteRequest request) {
         // check if user even exist
-
         Optional<Voter> voter = voterRepository.findByVoterId(request.getVoterId());
 
-        if(voter.isEmpty()) throw new VoterNotFoundException("This voter id does not exist");
+        // validate date the  vote is is within the voting range using the election id
 
-        if(!hasPermission(voter.get().getPermissions(), Permission.CAN_VOTE)) {
+        if(voter.isEmpty()) throw new NotFoundException("This voter id does not exist");
+
+        if(!HelperClass.hasPermission(voter.get().getPermissions(), Permission.CAN_VOTE)) {
             throw new PermissionNotFoundException("Voter does not have permission to vote" );
         }
 
     }
 
-    private boolean hasPermission(List<Permission> permissions, Permission existingPermission) {
-        for(Permission permission: permissions){
-            if(permission.equals(existingPermission)) return true;
-        }
-        return false;
-    }
+//    private boolean hasPermission(List<Permission> permissions, Permission existingPermission) {
+//        for(Permission permission: permissions){
+//            if(permission.equals(existingPermission)) return true;
+//        }
+//        return false;
+//    }
 
     private Vote mapToVote(VoteRequest request, String hashedVoterId){
         return Vote.builder()
