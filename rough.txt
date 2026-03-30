@@ -1,0 +1,3 @@
+the candidate id is formed using the
+electionId+ the candidate Id
+ELECT2024-CAND-001

@@ -5,9 +5,15 @@ import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamdev.exceptions.EmptyFileException;
+import org.dreamdev.exceptions.NotFoundException;
+import org.dreamdev.exceptions.PermissionNotFoundException;
 import org.dreamdev.models.Candidate;
 import org.dreamdev.models.CitizenshipType;
+import org.dreamdev.models.Electorate;
+import org.dreamdev.models.Permission;
 import org.dreamdev.repositories.CandidateRepository;
+import org.dreamdev.repositories.ElectionRepository;
+import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.utils.HelperClass;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +22,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -23,6 +30,8 @@ import java.util.List;
 public class CandidateService {
 
     private final CandidateRepository candidateRepository;
+
+    private final ElectorateRepository electorateRepository;
 
     public String uploadCandidate(MultipartFile file, String electorateId) {
 
@@ -39,6 +48,13 @@ public class CandidateService {
     }
 
     private void validate(String electorateId) {
+        Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
+
+        if(electorate.isEmpty()) throw new NotFoundException("Electorate with this Id not found");
+
+        if(!HelperClass.hasPermission(electorate.get().getPermissions(), Permission.CAN_UPLOAD_FILE)) {
+            throw new PermissionNotFoundException("Electorate does not have permission to vote" );
+        }
     }
 
     private List<Candidate>  getCandidateList(List<String[]> rows ){

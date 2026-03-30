@@ -40,7 +40,7 @@ public class ElectorateService {
 
     }
 
-    private void validateElectorate(String electorateId) {
+    public void validateElectorate(String electorateId) {
 
         Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
 

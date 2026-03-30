@@ -1,0 +1,4 @@
+electionId,electionName,date,startTime,stopTime
+ELECTPRES2026-001,Presidential Election 2026,2026-04-15,08:00,18:00
+ELECTSEN2026-002,Senatorial Election 2026,2026-04-20,09:00,17:00
+ELECTGUB2026-003,Gubernatorial Election 2026,2026-05-01,07:00,19:00

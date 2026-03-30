@@ -1,13 +1,19 @@
 package org.dreamdev.service;
 
 import org.dreamdev.models.Candidate;
+import org.dreamdev.models.Electorate;
+import org.dreamdev.models.Permission;
+import org.dreamdev.models.CitizenshipType;
 import org.dreamdev.repositories.CandidateRepository;
+import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.services.CandidateService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,15 +26,35 @@ public class CandidateServiceTest {
     @Autowired
     private CandidateRepository candidateRepository;
 
+    @Autowired
+    private ElectorateRepository electorateRepository;
+
     private MockMultipartFile validCsvFile;
     private MockMultipartFile emptyCsvFile;
 
-    private final String electorateId = "ELECTORATE-001";
+    private final String ELECTORATE_ID = "ELECTORATE-001";
 
     @BeforeEach
     public void setUp() {
+        // Clear previous data
         candidateRepository.deleteAll();
+        electorateRepository.deleteAll();
 
+        // Seed the electorate for this test
+        Electorate electorate = Electorate.builder()
+                .electorateId(ELECTORATE_ID)
+                .firstName("Samuel")
+                .lastName("Joseph")
+                .dateOfBirth("1990-05-15")
+                .citizenship(CitizenshipType.NATURALIZATION)
+                .permissions(List.of(
+                        Permission.CAN_UPLOAD_FILE,
+                        Permission.CAN_APPROVE_VOTER
+                ))
+                .build();
+        electorateRepository.save(electorate);
+
+        // Prepare CSV files
         String csvContent = """
                 candidateId,numberOfVote,categoryId,lastName,firstName,dateOfBirth,citizenship
                 ELECT2024-CAND-001,120,CAT-A,Okafor,Chinedu,1995-04-12,REGISTRATION
@@ -57,7 +83,7 @@ public class CandidateServiceTest {
     public void upload_candidates_from_csv_successfully() {
         assertEquals(0L, candidateRepository.count());
 
-        String result = candidateService.uploadCandidate(validCsvFile, electorateId );
+        String result = candidateService.uploadCandidate(validCsvFile, ELECTORATE_ID);
 
         assertEquals(5L, candidateRepository.count());
         assertEquals("5 candidates uploaded successfully", result);
@@ -65,7 +91,7 @@ public class CandidateServiceTest {
 
     @Test
     public void upload_candidates_saves_correct_data() {
-        candidateService.uploadCandidate(validCsvFile, electorateId);
+        candidateService.uploadCandidate(validCsvFile, ELECTORATE_ID);
 
         Candidate candidate = candidateRepository.findByCandidateId("ELECT2024-CAND-001");
 
@@ -78,7 +104,7 @@ public class CandidateServiceTest {
 
     @Test
     public void upload_empty_file_throws_exception() {
-        assertThrows(RuntimeException.class, () -> candidateService.uploadCandidate(emptyCsvFile, electorateId));
+        assertThrows(RuntimeException.class, () -> candidateService.uploadCandidate(emptyCsvFile, ELECTORATE_ID));
         assertEquals(0L, candidateRepository.count());
     }
 }
