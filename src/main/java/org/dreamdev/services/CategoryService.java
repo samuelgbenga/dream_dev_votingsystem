@@ -2,6 +2,7 @@ package org.dreamdev.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.dto.responses.CategoryResponse;
 import org.dreamdev.exceptions.EmptyFileException;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
@@ -41,7 +42,19 @@ public class CategoryService {
         return categories.size() + " categories uploaded successfully";
     }
 
-    // Validate that electorate exists and has permission
+    public List<CategoryResponse> getAllCategories() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private CategoryResponse mapToResponse(Category category) {
+        return CategoryResponse.builder()
+                .categoryId(category.getCategoryId())
+                .type(category.getType())
+                .build();
+    }
     private void validateElectorate(String electorateId) {
         Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
 
@@ -52,7 +65,6 @@ public class CategoryService {
         }
     }
 
-    // Convert CSV rows into Category objects
     private List<Category> getCategoryList(List<String[]> rows) {
         List<Category> categories = new ArrayList<>();
         for (String[] row : rows) {

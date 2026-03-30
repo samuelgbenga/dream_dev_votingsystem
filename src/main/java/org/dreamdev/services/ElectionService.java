@@ -3,6 +3,7 @@ package org.dreamdev.services;
 import com.opencsv.CSVReader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.dto.responses.ElectionResponse;
 import org.dreamdev.exceptions.EmptyFileException;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
@@ -44,6 +45,24 @@ public class ElectionService {
 
         log.info("{} elections uploaded successfully", elections.size());
         return elections.size() + " elections uploaded successfully";
+    }
+
+    // endpoints to get all election
+    public List<ElectionResponse> getAllElections() {
+        return electionRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private ElectionResponse mapToResponse(Election election) {
+        return ElectionResponse.builder()
+                .electionId(election.getElectionId())
+                .electionName(election.getElectionName())
+                .date(election.getDate())
+                .startTime(election.getStartTime())
+                .stopTime(election.getStopTime())
+                .build();
     }
 
     // Ensure the electorate exists and has permission to approve/upload

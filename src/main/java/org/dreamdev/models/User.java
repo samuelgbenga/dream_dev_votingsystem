@@ -24,8 +24,3 @@ public abstract class User {
     private LocalDateTime createdAt = LocalDateTime.now();
     private List<Permission> permissions = new ArrayList<>();
 }
-
-
-/*
-
- */

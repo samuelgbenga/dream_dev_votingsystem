@@ -3,6 +3,7 @@ package org.dreamdev.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.dto.responses.ElectorateResponse;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
 import org.dreamdev.models.Electorate;
@@ -13,6 +14,7 @@ import org.dreamdev.repositories.VoterRepository;
 import org.dreamdev.utils.HelperClass;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -50,6 +52,23 @@ public class ElectorateService {
             throw new PermissionNotFoundException("Electorate does not have permission to vote" );
         }
 
+    }
+
+    public List<ElectorateResponse> getAllElectorates() {
+        return electorateRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private ElectorateResponse mapToResponse(Electorate electorate) {
+        return ElectorateResponse.builder()
+                .lastName(electorate.getLastName())
+                .firstName(electorate.getFirstName())
+                .dateOfBirth(electorate.getDateOfBirth())
+                .citizenship(electorate.getCitizenship())
+                .electorateId(electorate.getElectorateId())
+                .build();
     }
 
 

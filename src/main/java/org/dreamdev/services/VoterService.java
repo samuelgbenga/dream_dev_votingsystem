@@ -4,6 +4,7 @@ package org.dreamdev.services;
 import lombok.RequiredArgsConstructor;
 import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
+import org.dreamdev.dto.responses.VoterResponse;
 import org.dreamdev.exceptions.*;
 import org.dreamdev.models.*;
 import org.dreamdev.repositories.CandidateRepository;
@@ -122,6 +123,24 @@ public class VoterService {
                 .voteStatus(VoteStatus.DEFAULTED)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    public List<VoterResponse> getAllVoters() {
+        return voterRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private VoterResponse mapToResponse(Voter voter) {
+        return VoterResponse.builder()
+                .lastName(voter.getLastName())
+                .firstName(voter.getFirstName())
+                .dateOfBirth(voter.getDateOfBirth())
+                .citizenship(voter.getCitizenship())
+                .voterId(voter.getVoterId())
+                .status(voter.getStatus())
                 .build();
     }
 

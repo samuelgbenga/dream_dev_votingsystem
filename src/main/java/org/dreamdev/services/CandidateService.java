@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.dto.responses.CandidateResponse;
 import org.dreamdev.exceptions.EmptyFileException;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
@@ -45,6 +46,25 @@ public class CandidateService {
         log.info("{} candidates uploaded successfully", candidates.size());
         return candidates.size() + " candidates uploaded successfully";
 
+    }
+
+    public List<CandidateResponse> getAllCandidates() {
+        return candidateRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
+    private CandidateResponse mapToResponse(Candidate candidate) {
+        return CandidateResponse.builder()
+                .lastName(candidate.getLastName())
+                .firstName(candidate.getFirstName())
+                .dateOfBirth(candidate.getDateOfBirth())
+                .citizenship(candidate.getCitizenship())
+                .candidateId(candidate.getCandidateId())
+                .numberOfVote(candidate.getNumberOfVote())
+                .categoryId(candidate.getCategoryId())
+                .build();
     }
 
     private void validate(String electorateId) {
