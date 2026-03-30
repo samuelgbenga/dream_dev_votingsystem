@@ -3,11 +3,14 @@ package org.dreamdev.utils;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.models.Election;
 import org.dreamdev.models.Permission;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Slf4j
@@ -30,5 +33,20 @@ public class HelperClass {
             log.error("Failed to read CSV file: {}", e.getMessage());
             throw new RuntimeException("Failed to process CSV file: " + e.getMessage());
         }
+    }
+
+    public static boolean isElectionValid(Election election) {
+        if (election == null) return false;
+
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        // Check if election date matches today
+        if (!today.equals(election.getDate())) return false;
+
+        // Check if current time is within start and stop times
+        if (election.getStartTime() == null || election.getStopTime() == null) return false;
+
+        return !now.isBefore(election.getStartTime()) && !now.isAfter(election.getStopTime());
     }
 }

@@ -91,7 +91,7 @@ public class ElectionServiceTest {
     public void upload_elections_saves_correct_data() {
         electionService.uploadElections(validCsvFile, ELECTORATE_ID);
 
-        Election election = electionRepository.findByElectionId("ELECTPRES2026");
+        Election election = electionRepository.findByElectionId("ELECTPRES2026").get();
 
         assertNotNull(election);
         assertEquals("Presidential Election 2026", election.getElectionName());

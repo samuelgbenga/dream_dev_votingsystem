@@ -16,6 +16,8 @@ public class Category {
     @Id
     private String id;
 
+    private String categoryId;
+
     private String type;
 
     private LocalDateTime createdAt;

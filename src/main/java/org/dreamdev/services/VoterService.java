@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
 import org.dreamdev.exceptions.CanNotVoteAgainException;
+import org.dreamdev.exceptions.InvalidElection;
 import org.dreamdev.exceptions.PermissionNotFoundException;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.models.*;
+import org.dreamdev.repositories.ElectionRepository;
 import org.dreamdev.repositories.VoteRepository;
 import org.dreamdev.repositories.VoterRepository;
 import org.dreamdev.utils.HelperClass;
@@ -29,6 +31,7 @@ public class VoterService {
     private final VoterRepository voterRepository;
     private final VoteRepository voteRepository;
     private final JwtService jwtService;
+    private final ElectionRepository electionRepository;
 
     public Voter registerVoter(VoterRequest request) {
         Voter voter = Voter.builder()
@@ -75,23 +78,21 @@ public class VoterService {
     private void validateVoter(VoteRequest request) {
         // check if user even exist
         Optional<Voter> voter = voterRepository.findByVoterId(request.getVoterId());
-
-        // validate date the  vote is is within the voting range using the election id
+        if(!isElectionValid(request.getElectionId())) throw new InvalidElection("Invalid Election");
 
         if(voter.isEmpty()) throw new NotFoundException("This voter id does not exist");
 
         if(!HelperClass.hasPermission(voter.get().getPermissions(), Permission.CAN_VOTE)) {
             throw new PermissionNotFoundException("Voter does not have permission to vote" );
         }
-
     }
 
-//    private boolean hasPermission(List<Permission> permissions, Permission existingPermission) {
-//        for(Permission permission: permissions){
-//            if(permission.equals(existingPermission)) return true;
-//        }
-//        return false;
-//    }
+    private boolean isElectionValid(String electionId){
+        Optional<Election> election = electionRepository.findByElectionId(electionId);
+        if(election.isEmpty()) throw new NotFoundException("Election with id not found");
+        return HelperClass.isElectionValid(election.get());
+    }
+
 
     private Vote mapToVote(VoteRequest request, String hashedVoterId){
         return Vote.builder()
