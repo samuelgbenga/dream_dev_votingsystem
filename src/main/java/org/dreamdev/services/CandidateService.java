@@ -8,6 +8,7 @@ import org.dreamdev.exceptions.EmptyFileException;
 import org.dreamdev.models.Candidate;
 import org.dreamdev.models.CitizenshipType;
 import org.dreamdev.repositories.CandidateRepository;
+import org.dreamdev.utils.HelperClass;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,21 +30,12 @@ public class CandidateService {
 
         if (file.isEmpty()) throw new EmptyFileException("File is empty");
 
-        try (CSVReader csvReader = new CSVReader(new InputStreamReader(file.getInputStream()))) {
-            List<String[]> rows = csvReader.readAll();
-            rows.remove(0);
+        List<Candidate> candidates = getCandidateList(HelperClass.readCSVFiles(file));
+        candidates.forEach(this::saveCandidate);
 
-            List<Candidate> candidates = getCandidateList(rows);
+        log.info("{} candidates uploaded successfully", candidates.size());
+        return candidates.size() + " candidates uploaded successfully";
 
-            candidates.forEach(this::saveCandidate);
-
-            log.info("{} candidates uploaded successfully", candidates.size());
-            return candidates.size() + " candidates uploaded successfully";
-
-        } catch (IOException | CsvException e) {
-            log.error("Failed to read CSV file: {}", e.getMessage());
-            throw new RuntimeException("Failed to process CSV file: " + e.getMessage());
-        }
     }
 
     private void validate(String electorateId) {

@@ -46,7 +46,6 @@ public class ElectorateService {
 
         if(electorate.isEmpty()) throw new NotFoundException("Electorate with this Id not found");
 
-
         if(!HelperClass.hasPermission(electorate.get().getPermissions(), Permission.CAN_APPROVE_VOTER)) {
             throw new PermissionNotFoundException("Electorate does not have permission to vote" );
         }
