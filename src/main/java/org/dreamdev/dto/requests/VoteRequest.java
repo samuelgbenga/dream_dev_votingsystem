@@ -7,5 +7,4 @@ public class VoteRequest {
     private String voterId;
     private String candidateId;
     private String categoryId;
-    private String electionId;
 }

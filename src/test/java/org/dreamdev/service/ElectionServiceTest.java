@@ -36,11 +36,9 @@ public class ElectionServiceTest {
 
     @BeforeEach
     public void setUp() {
-        // Clear previous data
         electionRepository.deleteAll();
         electorateRepository.deleteAll();
 
-        // Seed the electorate with permissions
         Electorate electorate = Electorate.builder()
                 .electorateId(ELECTORATE_ID)
                 .firstName("Samuel")

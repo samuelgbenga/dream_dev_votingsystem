@@ -41,10 +41,8 @@ public class HelperClass {
         LocalDate today = LocalDate.now();
         LocalTime now = LocalTime.now();
 
-        // Check if election date matches today
         if (!today.equals(election.getDate())) return false;
 
-        // Check if current time is within start and stop times
         if (election.getStartTime() == null || election.getStopTime() == null) return false;
 
         return !now.isBefore(election.getStartTime()) && !now.isAfter(election.getStopTime());

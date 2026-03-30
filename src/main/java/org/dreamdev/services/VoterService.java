@@ -40,7 +40,6 @@ public class VoterService {
                 .citizenship(request.getCitizenship())
                 .status(VoterStatus.PENDING)
                 .voterId(generateVoterId(request.getFirstName(), request.getLastName()))
-                //.permissions(List.of(Permission.CAN_UPLOAD_FILE))
                 .build();
 
         return voterRepository.save(voter);
@@ -48,16 +47,35 @@ public class VoterService {
 
 
     public String initiateVote(VoteRequest request) {
+        String electionId = getValidElectionId(request.getCandidateId());
         validateVoter(request);
-        boolean hasVoted = hasAlreadyVoted(request.getVoterId(), request.getElectionId(), request.getCategoryId());
+        boolean hasVoted = hasAlreadyVoted(request.getVoterId(), electionId, request.getCategoryId());
         if(hasVoted) throw new CanNotVoteAgainException("You have already voted in this category");
         String hashedVoterId = hashVoterId(request.getVoterId());
-        Vote vote = mapToVote(request, hashedVoterId);
+        Vote vote = mapToVote(request, hashedVoterId, electionId);
         Vote savedVote = voteRepository.save(vote);
         String jwtToken = jwtService.generateVoteToken(savedVote.getId());
         savedVote.setJwtToken(jwtToken);
         voteRepository.save(savedVote);
         return buildVoteCompletionLink(jwtToken);
+    }
+
+    private String getValidElectionId(String candidateId) {
+        String electionId = extractElectionId(candidateId);
+        if(!isElectionValid(electionId)) throw new InvalidElection("Invalid Election");
+        return null;
+    }
+
+    private String extractElectionId(String candidateId) {
+        if (candidateId == null || !candidateId.contains("-")) {
+            throw new InvalidIdFormat("Invalid candidateId format");
+        }
+        String[] parts = candidateId.split("-");
+        if (parts.length < 3) {
+            throw new InvalidIdFormat("Invalid candidateId format");
+        }
+
+        return parts[0];
     }
 
     public String confirmVote(String jwtToken){
@@ -79,9 +97,7 @@ public class VoterService {
     }
 
     private void validateVoter(VoteRequest request) {
-        // check if user even exist
         Optional<Voter> voter = voterRepository.findByVoterId(request.getVoterId());
-        if(!isElectionValid(request.getElectionId())) throw new InvalidElection("Invalid Election");
 
         if(voter.isEmpty()) throw new NotFoundException("This voter id does not exist");
 
@@ -97,9 +113,9 @@ public class VoterService {
     }
 
 
-    private Vote mapToVote(VoteRequest request, String hashedVoterId){
+    private Vote mapToVote(VoteRequest request, String hashedVoterId, String electionId){
         return Vote.builder()
-                .electionId(request.getElectionId())
+                .electionId(electionId)
                 .candidateId(request.getCandidateId())
                 .categoryId(request.getCategoryId())
                 .hashedVoterId(hashedVoterId)
@@ -111,7 +127,7 @@ public class VoterService {
 
 
     private String buildVoteCompletionLink(String jwtToken) {
-        return "https://localhost:8080/api/v1/votes/complete?complete_vote=" + jwtToken;
+        return "https://localhost:8080/api/v1/voters/complete_vote?jwtToken=" + jwtToken;
     }
 
     private boolean hasAlreadyVoted(String voterId, String electionId, String categoryId) {

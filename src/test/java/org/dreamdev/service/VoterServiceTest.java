@@ -4,14 +4,17 @@ import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
 import org.dreamdev.models.*;
 import org.dreamdev.repositories.CandidateRepository;
+import org.dreamdev.repositories.ElectionRepository;
 import org.dreamdev.repositories.VoteRepository;
 import org.dreamdev.repositories.VoterRepository;
+import org.dreamdev.services.ElectionService;
 import org.dreamdev.services.JwtService;
 import org.dreamdev.services.VoterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 
@@ -33,16 +36,25 @@ public class VoterServiceTest {
     private CandidateRepository candidateRepository;
 
     @Autowired
+    private ElectionRepository electionRepository;
+
+    @Autowired
+    private ElectionService electionService;
+
+    @Autowired
     private JwtService jwtService;
 
     private VoterRequest voterRequest;
 
     private VoteRequest voteRequest;
 
+    private final String ELECTORATE_ID = "ELECTORATE-001";
+
     @BeforeEach
     public void setUp() {
         voterRepository.deleteAll();
         voteRepository.deleteAll();
+        electionRepository.deleteAll();
 
         voterRequest = new VoterRequest();
         voterRequest.setFirstName("John");
@@ -54,9 +66,24 @@ public class VoterServiceTest {
         voteRequest.setVoterId("NIG-JD-0001");
 
         // will update the id later
-        voteRequest.setElectionId("election-001");
-        voteRequest.setCategoryId("category-001");
-        voteRequest.setCandidateId("candidate-001");
+        voteRequest.setCategoryId("CAT-001");
+        voteRequest.setCandidateId("ELECTGUB2026-CAND-001");
+
+        // Prepare CSV file with 3 elections
+        String csvContent = """
+                electionId,electionName,date,startTime,stopTime
+                ELECTPRES2026,Presidential Election 2026,2026-04-15,08:00,18:00
+                ELECTSEN2026,Senatorial Election 2026,2026-04-20,09:00,17:00
+                ELECTGUB2026,Gubernatorial Election 2026,2026-03-30,07:00,23:00""";
+
+        MockMultipartFile validCsvFile = new MockMultipartFile(
+                "file",
+                "elections.csv",
+                "text/csv",
+                csvContent.getBytes()
+        );
+
+        electionService.uploadElections(validCsvFile, ELECTORATE_ID);
 
     }
 
@@ -70,8 +97,6 @@ public class VoterServiceTest {
 
     @Test
     public void test_initiate_vote_successfully() {
-        // register voter with CAN_VOTE permission
-        //voterRequest.setPermissions(List.of(Permission.CAN_VOTE));
         Voter savedVoter = voterService.registerVoter(voterRequest);
         savedVoter.setPermissions(List.of(Permission.CAN_VOTE));
         voterRepository.save(savedVoter);
@@ -80,7 +105,7 @@ public class VoterServiceTest {
         String link = voterService.initiateVote(voteRequest);
 
         assertNotNull(link);
-        assertTrue(link.contains("/api/v1/votes/complete/"));
+        assertTrue(link.contains("/api/v1/voters/complete_vote"));
         assertEquals(1L, voteRepository.count());
     }
 
@@ -99,7 +124,7 @@ public class VoterServiceTest {
                 .candidateId("ELECTGUB2026-CAND-001")
                 .categoryId("CAT-003")
                 .hashedVoterId("hashed-id")
-                .voteStatus(org.dreamdev.models.VoteStatus.DEFAULTED)
+                .voteStatus(VoteStatus.DEFAULTED)
                 .build();
 
         Vote savedVote = voteRepository.save(vote);
