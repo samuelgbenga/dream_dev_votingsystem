@@ -7,8 +7,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "candidates")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @SuperBuilder
 public class Candidate extends User {
+
+
+    private String candidateId;
 
     private int numberOfVote;
 
