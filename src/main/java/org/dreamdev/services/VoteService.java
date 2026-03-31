@@ -49,9 +49,11 @@ public class VoteService {
                 .toList();
     }
 
-    public List<VoteResponse> getVotesByCategoryAndElection(String categoryId, String electionId) {
-        List<Vote> votes = voteRepository.findByCategoryIdAndElectionId(categoryId, electionId);
-        return votes.stream()
+    public List<VoteResponse> getVotesByCategoryAndElection(String categoryId, String electionId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Vote> votePage = voteRepository.findByCategoryIdAndElectionId(categoryId, electionId, pageable);
+
+        return votePage.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -89,4 +91,7 @@ public class VoteService {
                 .updatedAt(vote.getUpdatedAt())
                 .build();
     }
+
+
 }
+

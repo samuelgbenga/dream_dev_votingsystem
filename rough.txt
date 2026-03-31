@@ -15,3 +15,11 @@ VotersId format =
 CandidateId format = ELECTGUB2026-CAND-005
 ElectorateId format =
 Category format = CAT-PRES-003
+
+    //other metrics to consider
+    // get political apathy
+    // total number or registered vote
+    // total number of people that voted
+
+    add endpoint to get individiual details
+    and probably update

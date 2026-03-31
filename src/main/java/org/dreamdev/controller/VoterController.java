@@ -1,13 +1,17 @@
-package org.dreamdev.contoller;
+package org.dreamdev.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
+import org.dreamdev.dto.responses.VoteResponse;
+import org.dreamdev.dto.responses.VoterResponse;
 import org.dreamdev.services.VoterService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/voters")
@@ -54,5 +58,11 @@ public class VoterController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Failed to Confirm vote: " + ex.getMessage());
         }
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<VoterResponse>> getAllVoters() {
+        List<VoterResponse> voters = voterService.getAllVoters();
+        return ResponseEntity.ok(voters);
     }
 }
