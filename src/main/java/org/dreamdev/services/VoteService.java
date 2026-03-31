@@ -4,12 +4,14 @@ package org.dreamdev.services;
 import lombok.RequiredArgsConstructor;
 import org.dreamdev.dto.responses.CandidateVoteSummaryResponse;
 import org.dreamdev.dto.responses.VoteResponse;
-import org.dreamdev.models.Candidate;
-import org.dreamdev.models.Category;
-import org.dreamdev.models.Vote;
+import org.dreamdev.exceptions.NotFoundException;
+import org.dreamdev.exceptions.PermissionNotFoundException;
+import org.dreamdev.models.*;
 import org.dreamdev.repositories.CandidateRepository;
 import org.dreamdev.repositories.CategoryRepository;
+import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.repositories.VoteRepository;
+import org.dreamdev.utils.HelperClass;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,13 +33,15 @@ public class VoteService {
 
     private final CategoryRepository categoryRepository;
 
-
-    // get votes by categories.
-    // returns candidateName, candidateId and total votes. in descending order by
-    // number of votes per candidate
+    private final ElectorateRepository electorateRepository;
 
 
-    public List<VoteResponse> getAllVotes(int page, int size) {
+    public List<VoteResponse> getAllVotes(int page, int size, String electorateId) {
+        Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
+        if(electorate.isEmpty()) throw new NotFoundException("Electorate not found");
+        if(!HelperClass.hasPermission(electorate.get().getPermissions(), Permission.CAN_VIEW_VOTE)){
+            throw new PermissionNotFoundException("Does not have the required permission");
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Vote> votePage = voteRepository.findAll(pageable);
         return votePage.stream()
