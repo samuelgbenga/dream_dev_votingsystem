@@ -3,7 +3,10 @@ package org.dreamdev.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.dreamdev.dto.requests.ElectoratePermissionRequestDto;
+import org.dreamdev.dto.requests.ElectorateRequestDto;
 import org.dreamdev.dto.responses.ElectorateResponse;
+import org.dreamdev.exceptions.AlreadyExistException;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
 import org.dreamdev.models.Electorate;
@@ -42,7 +45,52 @@ public class ElectorateService {
 
     }
 
-    public void validateElectorate(String electorateId) {
+
+    public ElectorateResponse addNewElectorate(ElectorateRequestDto request, String assignerElectorateId) {
+
+        validateElectorate(assignerElectorateId);
+        Electorate electorate = Electorate.builder()
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
+                .dateOfBirth(request.getDateOfBirth())
+                .citizenship(request.getCitizenship())
+                .permissions(List.of(Permission.CAN_UPLOAD_FILE))
+                .electorateId(request.getElectorateId())
+                .build();
+
+        Electorate saved = electorateRepository.save(electorate);
+
+        return mapToResponse(saved);
+    }
+
+    public ElectorateResponse assignPermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
+
+        validateElectorate(assignerElectorateId);
+        Electorate electorate = getElectorateById(request.getElectorateId());
+        if(HelperClass.hasPermission(electorate.getPermissions(), request.getPermission())){
+            throw  new AlreadyExistException("Electorate Already has this permission");
+        }
+
+        electorate.getPermissions().add(request.getPermission());
+        Electorate saved = electorateRepository.save(electorate);
+        return mapToResponse(saved);
+    }
+
+    public ElectorateResponse removePermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
+        validateElectorate(assignerElectorateId);
+        Electorate electorate = getElectorateById(request.getElectorateId());
+        electorate.getPermissions().remove(request.getPermission());
+        Electorate saved = electorateRepository.save(electorate);
+        return mapToResponse(saved);
+    }
+
+    private Electorate getElectorateById(String electorateId) {
+        Optional<Electorate> optional = electorateRepository.findByElectorateId(electorateId);
+        if (optional.isEmpty()) throw new RuntimeException("Electorate not found");
+        return optional.get();
+    }
+
+    private void validateElectorate(String electorateId) {
 
         Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
 
@@ -54,11 +102,20 @@ public class ElectorateService {
 
     }
 
-    public List<ElectorateResponse> getAllElectorates() {
+    public List<ElectorateResponse> getAllElectorates(String electorateId) {
+        extracted(electorateId);
         return electorateRepository.findAll()
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
+    }
+
+    private void extracted(String electorateId) {
+        Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
+        if (electorate.isEmpty()) throw new NotFoundException("Electorate with this id not found");
+        if (!HelperClass.hasPermission(electorate.get().getPermissions(), Permission.CAN_VIEW_ELECTORATE)) {
+            throw new PermissionNotFoundException("You do not have required permission to view");
+        }
     }
 
     private ElectorateResponse mapToResponse(Electorate electorate) {
@@ -71,9 +128,4 @@ public class ElectorateService {
                 .build();
     }
 
-
-    // add a new electorate without
-
-
-    // update the permission status of an electorate
 }

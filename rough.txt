@@ -7,3 +7,11 @@ ELECT2024-CAND-001
 for now a user can vote every they find them self not tied to a state.
 because are one nation no autonomy of states everybody can vote where ever
 they find themself. no barrier to voting based on region this was deliberate
+
+not every one can view electorate's information.
+
+ElectionId format = ELECTGUB2026
+VotersId format =
+CandidateId format = ELECTGUB2026-CAND-005
+ElectorateId format =
+Category format = CAT-PRES-003

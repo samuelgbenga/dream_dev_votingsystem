@@ -42,7 +42,9 @@ public class DataSeeder implements CommandLineRunner {
                 .citizenship(CitizenshipType.NATURALIZATION)
                 .permissions(List.of(
                         Permission.CAN_UPLOAD_FILE,
-                        Permission.CAN_APPROVE_VOTER
+                        Permission.CAN_APPROVE_VOTER,
+                        Permission.CAN_VIEW_ELECTORATE
+
                 ))
                 .build();
     }
