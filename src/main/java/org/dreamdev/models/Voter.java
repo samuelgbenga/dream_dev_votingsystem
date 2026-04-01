@@ -13,5 +13,6 @@ public class Voter extends User {
 
     private String voterId;
 
+    @Setter
     private VoterStatus status;
 }

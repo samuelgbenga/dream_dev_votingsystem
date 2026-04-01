@@ -12,6 +12,7 @@ import org.dreamdev.exceptions.PermissionNotFoundException;
 import org.dreamdev.models.Electorate;
 import org.dreamdev.models.Permission;
 import org.dreamdev.models.Voter;
+import org.dreamdev.models.VoterStatus;
 import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.repositories.VoterRepository;
 import org.dreamdev.utils.HelperClass;
@@ -37,6 +38,7 @@ public class ElectorateService {
         Optional<Voter> voter = voterRepository.findByVoterId(voterId);
         if(voter.isEmpty()) throw new NotFoundException("No voter with this id");
 
+        voter.get().setStatus(VoterStatus.APPROVED);
         voter.get().getPermissions().add(Permission.CAN_VOTE);
 
         voterRepository.save(voter.get());
@@ -48,7 +50,7 @@ public class ElectorateService {
 
     public ElectorateResponse addNewElectorate(ElectorateRequestDto request, String assignerElectorateId) {
 
-        validateElectorate(assignerElectorateId);
+        validateElectorateForElectorate(assignerElectorateId);
         Electorate electorate = Electorate.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -65,7 +67,7 @@ public class ElectorateService {
 
     public ElectorateResponse assignPermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
 
-        validateElectorate(assignerElectorateId);
+        validateElectorateForElectorate(assignerElectorateId);
         Electorate electorate = getElectorateById(request.getElectorateId());
         if(HelperClass.hasPermission(electorate.getPermissions(), request.getPermission())){
             throw  new AlreadyExistException("Electorate Already has this permission");
@@ -77,7 +79,7 @@ public class ElectorateService {
     }
 
     public ElectorateResponse removePermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
-        validateElectorate(assignerElectorateId);
+        validateElectorateForElectorate(assignerElectorateId);
         Electorate electorate = getElectorateById(request.getElectorateId());
         electorate.getPermissions().remove(request.getPermission());
         Electorate saved = electorateRepository.save(electorate);
@@ -99,7 +101,17 @@ public class ElectorateService {
         if(!HelperClass.hasPermission(electorate.get().getPermissions(), Permission.CAN_APPROVE_VOTER)) {
             throw new PermissionNotFoundException("Electorate does not have permission to vote" );
         }
+    }
 
+    private void validateElectorateForElectorate(String electorateId) {
+
+        Optional<Electorate> electorate = electorateRepository.findByElectorateId(electorateId);
+
+        if(electorate.isEmpty()) throw new NotFoundException("Electorate with this Id not found");
+
+        if(!HelperClass.hasPermission(electorate.get().getPermissions(), Permission.CAN_UPDATE_ELECTORATE)) {
+            throw new PermissionNotFoundException("Electorate does not have permission to vote" );
+        }
     }
 
     public List<ElectorateResponse> getAllElectorates(String electorateId) {

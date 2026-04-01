@@ -43,7 +43,8 @@ public class DataSeeder implements CommandLineRunner {
                 .permissions(List.of(
                         Permission.CAN_UPLOAD_FILE,
                         Permission.CAN_APPROVE_VOTER,
-                        Permission.CAN_VIEW_ELECTORATE
+                        Permission.CAN_VIEW_ELECTORATE,
+                        Permission.CAN_UPDATE_ELECTORATE
 
                 ))
                 .build();
