@@ -267,11 +267,3 @@ Include:
 * Data initialization is handled via CSV uploads
 * Voting is restricted to defined time windows
 * Responsibilities are clearly separated across roles
-
----
-
-## Conclusion
-
-This design provides a secure, scalable, and structured approach to building a voting system. It enforces strong domain boundaries, ensures data integrity, and supports extensibility for future enhancements.
-
-You can now proceed to implement the ERD, use case diagram, and class diagram using tools such as draw.io.
