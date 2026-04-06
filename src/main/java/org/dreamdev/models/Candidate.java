@@ -11,13 +11,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @SuperBuilder
 public class Candidate extends User {
 
-
     private String candidateId;
 
     @Setter
     private int numberOfVote;
 
-    private String categoryId;
 
     private String uploadedBy;
 }

@@ -28,23 +28,30 @@ public class VoteController {
     }
 
 
-    @GetMapping("/category-election")
-    public ResponseEntity<List<VoteResponse>> getVotesByCategoryAndElection(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam String categoryId,
+//    @GetMapping("/category-election")
+//    public ResponseEntity<List<VoteResponse>> getVotesByCategoryAndElection(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size,
+//            @RequestParam String categoryId,
+//            @RequestParam String electionId
+//    ) {
+//        List<VoteResponse> votes = voteService.getVotesByCategoryAndElection(categoryId, electionId, page, size);
+//        return ResponseEntity.ok(votes);
+//    }
+
+    @GetMapping("/candidates-summary")
+    public ResponseEntity<List<CandidateVoteSummaryResponse>> getCandidatesVoteSummaryByElectionId(
             @RequestParam String electionId
     ) {
-        List<VoteResponse> votes = voteService.getVotesByCategoryAndElection(categoryId, electionId, page, size);
-        return ResponseEntity.ok(votes);
+        List<CandidateVoteSummaryResponse> summary = voteService.getCandidatesVoteSummaryByElectionId(electionId);
+        return ResponseEntity.ok(summary);
     }
 
     @GetMapping("/candidate-summary")
-    public ResponseEntity<List<CandidateVoteSummaryResponse>> getCandidateVoteSummary(
-            @RequestParam String categoryId,
-            @RequestParam String electionId
+    public ResponseEntity<CandidateVoteSummaryResponse> getCandidateVoteSummary(
+            @RequestParam String candidateId
     ) {
-        List<CandidateVoteSummaryResponse> summary = voteService.getCandidateVoteSummary(categoryId, electionId);
+        CandidateVoteSummaryResponse summary = voteService.getCandidateVoteSummary(candidateId);
         return ResponseEntity.ok(summary);
     }
 }

@@ -20,7 +20,9 @@ public class Election {
 
     private String electionId;
 
-    private String electionName;
+    private Category category;
+
+    private State  state;
 
     private LocalDate date;
 

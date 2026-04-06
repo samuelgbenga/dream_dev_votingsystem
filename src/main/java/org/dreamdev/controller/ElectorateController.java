@@ -51,12 +51,12 @@ public class ElectorateController {
     }
 
     @PostMapping("/assign-permission")
-    public ResponseEntity<ElectorateResponse> assignPermission(
+    public ResponseEntity<?> assignPermission(
             @RequestBody ElectoratePermissionRequestDto request,
             @RequestParam("assignerElectorateId") String assignerElectorateId) {
 
         try {
-            ElectorateResponse response = electorateService.assignPermissions(request, assignerElectorateId);
+            String response = electorateService.assignPermissions(request, assignerElectorateId);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Error assigning permission: {}", ex.getMessage(), ex);
@@ -65,12 +65,12 @@ public class ElectorateController {
     }
 
     @PostMapping("/remove-permission")
-    public ResponseEntity<ElectorateResponse> removePermission(
+    public ResponseEntity<?> removePermission(
             @RequestBody ElectoratePermissionRequestDto request,
             @RequestParam("assignerElectorateId") String assignerElectorateId) {
 
         try {
-            ElectorateResponse response = electorateService.removePermissions(request, assignerElectorateId);
+            String response = electorateService.removePermissions(request, assignerElectorateId);
             return ResponseEntity.ok(response);
         } catch (Exception ex) {
             log.error("Error removing permission: {}", ex.getMessage(), ex);

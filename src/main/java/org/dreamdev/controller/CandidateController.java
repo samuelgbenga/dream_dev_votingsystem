@@ -52,4 +52,18 @@ public class CandidateController {
                     .build();
         }
     }
+
+    @GetMapping("/getbyelectionId")
+    public ResponseEntity<List<CandidateResponse>> getAllCandidatesByElectionId(
+            @RequestParam String electionId
+    ) {
+        try {
+            List<CandidateResponse> candidates = candidateService.getAllCandidatesByElectionId(electionId);
+            return ResponseEntity.ok(candidates);
+        } catch (Exception ex) {
+            log.error("Error fetching candidates: {}", ex.getMessage(), ex);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
+        }
+    }
 }

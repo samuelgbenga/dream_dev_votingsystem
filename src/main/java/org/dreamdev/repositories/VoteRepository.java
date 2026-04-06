@@ -12,8 +12,5 @@ import java.util.List;
 
 @Repository
 public interface VoteRepository extends MongoRepository<Vote, String> {
-    boolean existsByHashedVoterIdAndElectionIdAndCategoryId(String hashedVoterId, String electionId, String categoryId);
-//    List<Vote> findByCategoryIdAndElectionId(String categoryId, String electionId);
-    Page<Vote> findByCategoryIdAndElectionId(String categoryId, String electionId, Pageable pageable);
-
+    boolean existsByHashedVoterIdAndElectionId(String hashedVoterId, String electionId);
 }

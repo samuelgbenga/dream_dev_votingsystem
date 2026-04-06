@@ -65,25 +65,24 @@ public class ElectorateService {
         return mapToResponse(saved);
     }
 
-    public ElectorateResponse assignPermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
+    public String assignPermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
 
         validateElectorateForElectorate(assignerElectorateId);
         Electorate electorate = getElectorateById(request.getElectorateId());
         if(HelperClass.hasPermission(electorate.getPermissions(), request.getPermission())){
             throw  new AlreadyExistException("Electorate Already has this permission");
         }
-
         electorate.getPermissions().add(request.getPermission());
-        Electorate saved = electorateRepository.save(electorate);
-        return mapToResponse(saved);
+        electorateRepository.save(electorate);
+         return "Assigned Permission Successfully";
     }
 
-    public ElectorateResponse removePermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
+    public String removePermissions(ElectoratePermissionRequestDto request, String assignerElectorateId) {
         validateElectorateForElectorate(assignerElectorateId);
         Electorate electorate = getElectorateById(request.getElectorateId());
         electorate.getPermissions().remove(request.getPermission());
-        Electorate saved = electorateRepository.save(electorate);
-        return mapToResponse(saved);
+        electorateRepository.save(electorate);
+        return "Removed Permission Successfully";
     }
 
     private Electorate getElectorateById(String electorateId) {

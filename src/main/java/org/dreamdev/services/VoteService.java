@@ -8,7 +8,7 @@ import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
 import org.dreamdev.models.*;
 import org.dreamdev.repositories.CandidateRepository;
-import org.dreamdev.repositories.CategoryRepository;
+import org.dreamdev.repositories.ElectionRepository;
 import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.repositories.VoteRepository;
 import org.dreamdev.utils.HelperClass;
@@ -31,9 +31,8 @@ public class VoteService {
 
     private final CandidateRepository candidateRepository;
 
-    private final CategoryRepository categoryRepository;
-
     private final ElectorateRepository electorateRepository;
+    private final ElectionRepository electionRepository;
 
 
     public List<VoteResponse> getAllVotes(int page, int size, String electorateId) {
@@ -49,29 +48,45 @@ public class VoteService {
                 .toList();
     }
 
-    public List<VoteResponse> getVotesByCategoryAndElection(String categoryId, String electionId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Vote> votePage = voteRepository.findByCategoryIdAndElectionId(categoryId, electionId, pageable);
+//    public List<VoteResponse> getVotesByCategoryAndElection( String electionId, int page, int size) {
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+//        Page<Vote> votePage = voteRepository.findByElectionId(electionId, pageable);
+//
+//        return votePage.stream()
+//                .map(this::mapToResponse)
+//                .collect(Collectors.toList());
+//    }
 
-        return votePage.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+
+    public CandidateVoteSummaryResponse getCandidateVoteSummary(String candidateId) {
+
+
+        String electionId = HelperClass.extractElectionId(candidateId);
+
+        Optional<Candidate> candidate = candidateRepository.findByCandidateId(candidateId);
+
+        if(candidate.isEmpty()) throw new NotFoundException("Candidate not found");
+
+        return  CandidateVoteSummaryResponse.builder()
+                        .electionId(candidate.get().getCandidateId())
+                        .candidateId(candidate.get().getCandidateId())
+                        .category(getElectionCategory(electionId))
+                        .firstName(candidate.get().getFirstName())
+                        .lastName(candidate.get().getLastName())
+                        .numberOfVote(candidate.get().getNumberOfVote())
+                        .build();
     }
 
-    public List<CandidateVoteSummaryResponse> getCandidateVoteSummary(String categoryId, String electionId) {
+    public List<CandidateVoteSummaryResponse> getCandidatesVoteSummaryByElectionId(String electionId) {
+        List<Candidate> candidates = candidateRepository.findByCandidateIdStartingWith(electionId);
 
-        List<Candidate> candidates = candidateRepository.findByCategoryIdAndCandidateIdStartingWith(categoryId, electionId);
-
-        String categoryType = categoryRepository.findByCategoryId(categoryId)
-                .map(Category::getType)
-                .orElse("Unknown");
+        Category category = getElectionCategory(electionId);
 
         return candidates.stream()
                 .map(c -> CandidateVoteSummaryResponse.builder()
                         .electionId(electionId)
-                        .categoryId(c.getCategoryId())
-                        .categoryType(categoryType)
                         .candidateId(c.getCandidateId())
+                        .category(category)
                         .firstName(c.getFirstName())
                         .lastName(c.getLastName())
                         .numberOfVote(c.getNumberOfVote())
@@ -85,11 +100,17 @@ public class VoteService {
         return VoteResponse.builder()
                 .electionId(vote.getElectionId())
                 .candidateId(vote.getCandidateId())
-                .categoryId(vote.getCategoryId())
                 .voteStatus(vote.getVoteStatus())
                 .createdAt(vote.getCreatedAt())
                 .updatedAt(vote.getUpdatedAt())
                 .build();
+    }
+
+    private Category getElectionCategory(String electionId) {
+        Election election = electionRepository.findByElectionId(electionId).orElseThrow(
+                ()-> new NotFoundException("Election with this id not found")
+        );
+        return election.getCategory();
     }
 
 

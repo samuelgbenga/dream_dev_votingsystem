@@ -28,12 +28,19 @@ public class Vote {
 
     private String candidateId;
 
-    private String categoryId;
-
     @Setter
     private String jwtToken;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    // later tie voter to vote only in there state of residence\
+    // using dynamic permission.
+    // i voter will be assign a dynamic permission
+    // called CAN_VOTE_IN_[KOGI THIS WOULE BE DYNAMIC]
+    // this dynamic should be assigned upon approval by electorate
+    //the dynamic is based on there state of residence.
+    // However with only CAN_VOTE  permission voters should be
+    // able to vote for presidents
 }

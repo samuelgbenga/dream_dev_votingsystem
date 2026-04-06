@@ -37,9 +37,10 @@ public class CandidateService {
     public String uploadCandidate(MultipartFile file, String electorateId) {
 
         validate(electorateId);
-
         if (file.isEmpty()) throw new EmptyFileException("File is empty");
-
+        HelperClass.validateCSVHeaders(file, List.of(
+                "candidateId", "lastName", "firstName", "dateOfBirth", "citizenship"
+        ));
         List<Candidate> candidates = getCandidateList(HelperClass.readCSVFiles(file));
         candidates.forEach(this::saveCandidate);
 
@@ -55,6 +56,13 @@ public class CandidateService {
                 .toList();
     }
 
+    public List<CandidateResponse> getAllCandidatesByElectionId(String electionId) {
+        return candidateRepository.findByCandidateIdStartingWith(electionId)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private CandidateResponse mapToResponse(Candidate candidate) {
         return CandidateResponse.builder()
                 .lastName(candidate.getLastName())
@@ -63,7 +71,6 @@ public class CandidateService {
                 .citizenship(candidate.getCitizenship())
                 .candidateId(candidate.getCandidateId())
                 .numberOfVote(candidate.getNumberOfVote())
-                .categoryId(candidate.getCategoryId())
                 .build();
     }
 
@@ -82,12 +89,10 @@ public class CandidateService {
         for (String[] row : rows) {
             Candidate candidate = Candidate.builder()
                     .candidateId(row[0])
-                    .numberOfVote(Integer.parseInt(row[1]))
-                    .categoryId(row[2])
-                    .lastName(row[3])
-                    .firstName(row[4])
-                    .dateOfBirth(row[5])
-                    .citizenship(CitizenshipType.valueOf(row[6]))
+                    .lastName(row[1])
+                    .firstName(row[2])
+                    .dateOfBirth(row[3])
+                    .citizenship(CitizenshipType.valueOf(row[4]))
                     .build();
             candidates.add(candidate);
         }
@@ -95,6 +100,10 @@ public class CandidateService {
     }
 
     private void saveCandidate(Candidate candidate) {
+        if (candidateRepository.existsByCandidateId(candidate.getCandidateId())) {
+            log.warn("Candidate with ID {} already exists, skipping", candidate.getCandidateId());
+            return;
+        }
         candidateRepository.save(candidate);
         log.info("Saved candidate: {}", candidate.getCandidateId());
     }

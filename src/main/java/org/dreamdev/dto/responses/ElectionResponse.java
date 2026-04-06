@@ -2,6 +2,8 @@ package org.dreamdev.dto.responses;
 
 import lombok.Builder;
 import lombok.Data;
+import org.dreamdev.models.Category;
+import org.dreamdev.models.State;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -11,7 +13,8 @@ import java.time.LocalTime;
 public class ElectionResponse {
 
     private String electionId;
-    private String electionName;
+    private Category category;
+    private State state;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime stopTime;

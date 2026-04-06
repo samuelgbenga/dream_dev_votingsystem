@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public interface CandidateRepository extends MongoRepository<Candidate, String> {
     Optional<Candidate> findByCandidateId(String s);
-    List<Candidate> findByCategoryIdAndCandidateIdStartingWith(String categoryId, String electionIdPrefix);
 
+    List<Candidate> findByCandidateIdStartingWith(String electionId);
+
+    boolean existsByCandidateId(String candidateId);
 }

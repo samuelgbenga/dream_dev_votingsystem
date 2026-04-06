@@ -50,7 +50,7 @@ public class VoterService {
     public String initiateVote(VoteRequest request) {
         String electionId = getValidElectionId(request.getCandidateId());
         validateVoter(request);
-        boolean hasVoted = hasAlreadyVoted(request.getVoterId(), electionId, request.getCategoryId());
+        boolean hasVoted = hasAlreadyVoted(request.getVoterId(), electionId);
         if(hasVoted) throw new CanNotVoteAgainException("You have already voted in this category");
         String hashedVoterId = hashVoterId(request.getVoterId());
         Vote vote = mapToVote(request, hashedVoterId, electionId);
@@ -61,23 +61,7 @@ public class VoterService {
         return buildVoteCompletionLink(jwtToken);
     }
 
-    private String getValidElectionId(String candidateId) {
-        String electionId = extractElectionId(candidateId);
-        if(!isElectionValid(electionId)) throw new InvalidElection("Invalid Election");
-        return null;
-    }
 
-    private String extractElectionId(String candidateId) {
-        if (candidateId == null || !candidateId.contains("-")) {
-            throw new InvalidIdFormat("Invalid candidateId format");
-        }
-        String[] parts = candidateId.split("-");
-        if (parts.length < 3) {
-            throw new InvalidIdFormat("Invalid candidateId format");
-        }
-
-        return parts[0];
-    }
 
     public String confirmVote(String jwtToken){
         if(!jwtService.isTokenValid(jwtToken)) throw new ExpiredTokenException("Token is invalid expired");
@@ -107,6 +91,12 @@ public class VoterService {
         }
     }
 
+    private String getValidElectionId(String candidateId) {
+        String electionId = HelperClass.extractElectionId(candidateId);
+        if(!isElectionValid(electionId)) throw new InvalidElection("Invalid Election");
+        return electionId;
+    }
+
     private boolean isElectionValid(String electionId){
         Optional<Election> election = electionRepository.findByElectionId(electionId);
         if(election.isEmpty()) throw new NotFoundException("Election with id not found");
@@ -118,7 +108,6 @@ public class VoterService {
         return Vote.builder()
                 .electionId(electionId)
                 .candidateId(request.getCandidateId())
-                .categoryId(request.getCategoryId())
                 .hashedVoterId(hashedVoterId)
                 .voteStatus(VoteStatus.DEFAULTED)
                 .createdAt(LocalDateTime.now())
@@ -149,9 +138,9 @@ public class VoterService {
         return "https://localhost:8080/api/v1/voters/complete_vote?jwtToken=" + jwtToken;
     }
 
-    private boolean hasAlreadyVoted(String voterId, String electionId, String categoryId) {
+    private boolean hasAlreadyVoted(String voterId, String electionId) {
         String hashedVoterId = hashVoterId(voterId);
-        return voteRepository.existsByHashedVoterIdAndElectionIdAndCategoryId(hashedVoterId, electionId, categoryId);
+        return voteRepository.existsByHashedVoterIdAndElectionId(hashedVoterId, electionId);
     }
 
     private String hashVoterId(String voterId) {

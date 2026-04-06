@@ -8,12 +8,10 @@ import org.dreamdev.models.CitizenshipType;
 @Data
 @Builder
 public class CandidateResponse {
-
     private String lastName;
     private String firstName;
     private String dateOfBirth;
     private CitizenshipType citizenship;
     private String candidateId;
     private int numberOfVote;
-    private String categoryId;
 }

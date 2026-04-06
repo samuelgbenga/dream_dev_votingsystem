@@ -23,3 +23,41 @@ Category format = CAT-PRES-003
 
     add endpoint to get individiual details
     and probably update
+
+
+upload the election first
+upload the category
+then upload the candidate
+
+i removed the category id
+and created a new category enum for the election itself
+every election item/objection represents a single election
+that only single candidate can win unlike previously where it
+can represent a collection of vote per time i.e happening withing that specific time.
+election is now tied to a state. so only residence of that state can vote.
+this is permissin based
+
+
+   // later tie voter to vote only in there state of residence\
+    // using dynamic permission.
+    // i voter will be assign a dynamic permission
+    // called CAN_VOTE_IN_[KOGI THIS WOULE BE DYNAMIC]
+    // this dynamic should be assigned upon approval by electorate
+    //the dynamic is based on there state of residence.
+    // However with only CAN_VOTE  permission voters should be
+    // able to vote for presidents
+
+
+    *************************************************
+    // endpoint to get election within thesame state and date
+    // endpoint to get all available category
+    // then test a complete vote.
+    // drop table again.
+    // so we can seed permission ( you might not need to drop the table)
+
+    this voting app only covers for state wide and nation wide election.
+
+    each election represent a single election for one candidate to win
+    that is a for governor(gubernatorial) election is represented by one election entry
+    even if it takes place with other election. those other ones also have there
+    representative.
