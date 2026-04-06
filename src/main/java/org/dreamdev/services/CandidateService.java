@@ -34,19 +34,38 @@ public class CandidateService {
 
     private final ElectorateRepository electorateRepository;
 
-    public String uploadCandidate(MultipartFile file, String electorateId) {
+//    public String uploadCandidate(MultipartFile file, String electorateId) {
+//
+//        validate(electorateId);
+//        if (file.isEmpty()) throw new EmptyFileException("File is empty");
+//        HelperClass.validateCSVHeaders(file, List.of(
+//                "candidateId", "lastName", "firstName", "dateOfBirth", "citizenship"
+//        ));
+//        List<Candidate> candidates = getCandidateList(HelperClass.readCSVFiles(file));
+//        candidates.forEach(this::saveCandidate);
+//
+//        log.info("{} candidates uploaded successfully", candidates.size());
+//        return candidates.size() + " candidates uploaded successfully";
+//
+//    }
 
+    public String uploadCandidate(MultipartFile file, String electorateId) {
         validate(electorateId);
         if (file.isEmpty()) throw new EmptyFileException("File is empty");
         HelperClass.validateCSVHeaders(file, List.of(
                 "candidateId", "lastName", "firstName", "dateOfBirth", "citizenship"
         ));
+
         List<Candidate> candidates = getCandidateList(HelperClass.readCSVFiles(file));
-        candidates.forEach(this::saveCandidate);
 
-        log.info("{} candidates uploaded successfully", candidates.size());
-        return candidates.size() + " candidates uploaded successfully";
+        long saved = candidates.stream()
+                .filter(c -> !candidateRepository.existsByCandidateId(c.getCandidateId()))
+                .peek(candidateRepository::save)
+                .count();
 
+        long skipped = candidates.size() - saved;
+        log.info("{} candidates saved, {} skipped (already exist)", saved, skipped);
+        return saved + " candidates uploaded successfully, " + skipped + " skipped (already exist)";
     }
 
     public List<CandidateResponse> getAllCandidates() {
