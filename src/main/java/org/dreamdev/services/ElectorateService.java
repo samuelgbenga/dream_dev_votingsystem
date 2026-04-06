@@ -9,10 +9,7 @@ import org.dreamdev.dto.responses.ElectorateResponse;
 import org.dreamdev.exceptions.AlreadyExistException;
 import org.dreamdev.exceptions.NotFoundException;
 import org.dreamdev.exceptions.PermissionNotFoundException;
-import org.dreamdev.models.Electorate;
-import org.dreamdev.models.Permission;
-import org.dreamdev.models.Voter;
-import org.dreamdev.models.VoterStatus;
+import org.dreamdev.models.*;
 import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.repositories.VoterRepository;
 import org.dreamdev.utils.HelperClass;
@@ -40,7 +37,8 @@ public class ElectorateService {
 
         voter.get().setStatus(VoterStatus.APPROVED);
         voter.get().getPermissions().add(Permission.CAN_VOTE);
-
+        voter.get().getStatePermissions().add(Permission.forState(voter.get().getStateOfResidence()));
+        voter.get().getStatePermissions().add(Permission.forState(State.NATIONAL));
         voterRepository.save(voter.get());
 
         return "Your voting id has been approved";

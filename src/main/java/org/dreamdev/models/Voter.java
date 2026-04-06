@@ -4,6 +4,9 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection = "voters")
 @Getter
 @NoArgsConstructor
@@ -17,4 +20,7 @@ public class Voter extends User {
 
     @Setter
     private VoterStatus status;
+
+    private List<String> statePermissions = new ArrayList<>(); // for dynamic ones
+
 }

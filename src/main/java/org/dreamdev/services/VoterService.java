@@ -2,6 +2,7 @@ package org.dreamdev.services;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.dreamdev.dto.requests.VoteRequest;
 import org.dreamdev.dto.requests.VoterRequest;
 import org.dreamdev.dto.responses.VoterResponse;
@@ -25,6 +26,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VoterService {
 
     private final VoterRepository voterRepository;
@@ -33,23 +35,25 @@ public class VoterService {
     private final ElectionRepository electionRepository;
     private final CandidateRepository candidateRepository;
 
-    public Voter registerVoter(VoterRequest request) {
+    public VoterResponse registerVoter(VoterRequest request) {
         Voter voter = Voter.builder()
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .dateOfBirth(request.getDateOfBirth())
                 .citizenship(request.getCitizenship())
+                .stateOfResidence(request.getStateOfResidence())
                 .status(VoterStatus.PENDING)
                 .voterId(generateVoterId(request.getFirstName(), request.getLastName()))
                 .build();
 
-        return voterRepository.save(voter);
+        return mapToResponse(voterRepository.save(voter));
     }
 
 
     public String initiateVote(VoteRequest request) {
         String electionId = getValidElectionId(request.getCandidateId());
-        validateVoter(request);
+        log.info("initiateVote electionId={}", electionId);
+        validateVoter(request, electionId);
         boolean hasVoted = hasAlreadyVoted(request.getVoterId(), electionId);
         if(hasVoted) throw new CanNotVoteAgainException("You have already voted in this category");
         String hashedVoterId = hashVoterId(request.getVoterId());
@@ -81,10 +85,14 @@ public class VoterService {
         candidateRepository.save(candidate.get());
     }
 
-    private void validateVoter(VoteRequest request) {
+    private void validateVoter(VoteRequest request, String electionId) {
         Optional<Voter> voter = voterRepository.findByVoterId(request.getVoterId());
 
         if(voter.isEmpty()) throw new NotFoundException("This voter id does not exist");
+
+        if(!HelperClass.hasStatePermission(voter.get().getStatePermissions(), getElectionState(electionId))) {
+            throw new PermissionNotFoundException("Voter does not have permission to vote in this state");
+        }
 
         if(!HelperClass.hasPermission(voter.get().getPermissions(), Permission.CAN_VOTE)) {
             throw new PermissionNotFoundException("Voter does not have permission to vote" );
@@ -128,6 +136,7 @@ public class VoterService {
                 .firstName(voter.getFirstName())
                 .dateOfBirth(voter.getDateOfBirth())
                 .citizenship(voter.getCitizenship())
+                .stateOfResidence(voter.getStateOfResidence())
                 .voterId(voter.getVoterId())
                 .status(voter.getStatus())
                 .build();
@@ -161,4 +170,10 @@ public class VoterService {
         return "NIG-" + initials + "-" + timestamp;
     }
 
+    private State getElectionState(String electionId){
+        Election election = electionRepository.findByElectionId(electionId).orElseThrow(
+                ()-> new NotFoundException("Election with this Id not found")
+        );
+        return election.getState();
+    }
 }

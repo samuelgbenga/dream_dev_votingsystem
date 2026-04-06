@@ -1,5 +1,6 @@
 package org.dreamdev.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dreamdev.dto.requests.VoteRequest;
@@ -25,7 +26,7 @@ public class VoterController {
      * Register a new voter
      */
     @PostMapping("/register")
-    public ResponseEntity<?> registerVoter(@RequestBody VoterRequest request) {
+    public ResponseEntity<?> registerVoter(@Valid @RequestBody VoterRequest request) {
         try {
             return ResponseEntity.ok(voterService.registerVoter(request));
         } catch (Exception ex) {

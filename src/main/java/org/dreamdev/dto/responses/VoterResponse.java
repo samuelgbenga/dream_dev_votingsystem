@@ -3,6 +3,7 @@ package org.dreamdev.dto.responses;
 import lombok.Builder;
 import lombok.Data;
 import org.dreamdev.models.CitizenshipType;
+import org.dreamdev.models.State;
 import org.dreamdev.models.VoterStatus;
 
 @Data
@@ -13,5 +14,6 @@ public class VoterResponse {
     private String dateOfBirth;
     private CitizenshipType citizenship;
     private String voterId;
+    private State stateOfResidence;
     private VoterStatus status;
 }

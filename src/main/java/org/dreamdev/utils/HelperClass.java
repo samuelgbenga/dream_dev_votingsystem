@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dreamdev.exceptions.*;
 import org.dreamdev.models.Election;
 import org.dreamdev.models.Permission;
+import org.dreamdev.models.State;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,10 +23,11 @@ import java.util.Optional;
 public class HelperClass {
 
     public static boolean hasPermission(List<Permission> permissions, Permission existingPermission) {
-        for(Permission permission: permissions){
-            if(permission.equals(existingPermission)) return true;
-        }
-        return false;
+        return permissions.contains(existingPermission);
+    }
+
+    public static boolean hasStatePermission(List<String> statePermissions, State state) {
+        return statePermissions.contains(Permission.forState(state));
     }
 
 
@@ -98,13 +100,13 @@ public class HelperClass {
     public static String extractElectionId(String candidateId) {
         log.info("Checking if the candidate id is null or does not contain -");
         if (candidateId == null || !candidateId.contains("-")) {
-            log.info("Invalid candidate ID: " + candidateId);
+            log.info("Invalid candidate ID: {}", candidateId);
             throw new InvalidIdFormat("Invalid candidateId format");
         }
         String[] parts = candidateId.split("-");
         log.info("Checking if the length is less than 3");
         if (parts.length < 3) {
-            log.info("Invalid candidate ID: " + candidateId);
+            log.info("Invalid candidate ID: {}", candidateId);
             throw new InvalidIdFormat("Invalid candidateId format");
         }
 

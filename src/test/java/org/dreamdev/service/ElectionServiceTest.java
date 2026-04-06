@@ -1,9 +1,6 @@
 package org.dreamdev.service;
 
-import org.dreamdev.models.Electorate;
-import org.dreamdev.models.Election;
-import org.dreamdev.models.Permission;
-import org.dreamdev.models.CitizenshipType;
+import org.dreamdev.models.*;
 import org.dreamdev.repositories.ElectionRepository;
 import org.dreamdev.repositories.ElectorateRepository;
 import org.dreamdev.services.ElectionService;
@@ -89,10 +86,10 @@ public class ElectionServiceTest {
     public void upload_elections_saves_correct_data() {
         electionService.uploadElections(validCsvFile, ELECTORATE_ID);
 
-        Election election = electionRepository.findByElectionId("ELECTPRES2026").get();
+        Election election = electionRepository.findByElectionId("ELECTION2026").get();
 
         assertNotNull(election);
-        assertEquals("Presidential Election 2026", election.getElectionName());
+        assertEquals(Category.PRESIDENTIAL, election.getCategory());
         assertEquals("08:00", election.getStartTime().toString());
         assertEquals("18:00", election.getStopTime().toString());
     }

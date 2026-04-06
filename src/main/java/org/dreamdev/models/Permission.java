@@ -8,5 +8,9 @@ public enum Permission {
     CAN_VIEW_METRICS,
     CAN_VIEW_ELECTORATE,
     CAN_VIEW_VOTE,
-    CAN_UPDATE_ELECTORATE
+    CAN_UPDATE_ELECTORATE;
+
+    public static String forState(State state) {
+        return "CAN_VOTE_" + state.name();
+    }
 }

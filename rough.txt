@@ -61,3 +61,9 @@ this is permissin based
     that is a for governor(gubernatorial) election is represented by one election entry
     even if it takes place with other election. those other ones also have there
     representative.
+
+    you want to later add permission to restrict Electorate from given themself
+    permission to vote
+
+    for presidential and other nation wide election election the state value is
+    NATIONAL
